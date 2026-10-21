@@ -90,10 +90,10 @@ First concrete step: build Phase 0 around Ratnapura, Sri Lanka. River-gravel dig
 ## Open questions
 
 - [ ] Reference games: which ones do you want to pull from (mining feel, overworld map, collection screen)?
-- [ ] Camera for dig sites: first person, third person, or top-down?
-- [ ] Earth-core layer: realistic depths with fictional tools, or a stylized "journey to the center" mode?
+- [x] Camera for dig sites: first person, third person, or top-down? → **First person** (see [Decisions D1](Decisions.md))
+- [x] Earth-core layer: realistic depths with fictional tools, or a stylized "journey to the center" mode? → **Realistic depths** (see [Decisions D2](Decisions.md))
 - [ ] Art style: stylized (cheaper, ages well) or photoreal with Nanite and Smithsonian photo references?
-- [ ] Solo forever, or co-op digging later? (Affects whether voxel edits need replication.)
+- [x] Solo forever, or co-op digging later? (Affects whether voxel edits need replication.) → **Solo on Earth, co-op for space missions** (see [Decisions D1](Decisions.md))
 - [ ] Which gems from your book make the first 20?
 
 ## Sources
