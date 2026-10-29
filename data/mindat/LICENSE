@@ -1,0 +1,36 @@
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)
+
+Everything in this directory (data/mindat/) is derived from Mindat
+(https://www.mindat.org/, https://api.mindat.org/) and is licensed under
+CC BY-NC-SA 4.0.
+
+The full legal code is published by Creative Commons and is NOT reproduced here;
+read it at:
+
+    https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+Human-readable summary:
+
+    https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+You are free to share and adapt this material, under these terms:
+
+  BY    - Attribution. Credit Mindat, link to the licence, and state whether you
+          made changes.
+  NC    - NonCommercial. You may not use the material for commercial purposes.
+  SA    - ShareAlike. Anything you build from it must carry this same licence.
+
+Attribution:
+
+    Locality and mineral-occurrence data from Mindat.org, licensed CC BY-NC-SA 4.0.
+    https://www.mindat.org/
+
+IMPORTANT FOR CONTRIBUTORS
+
+This licence applies to this directory ONLY. The rest of the repository is
+Apache-2.0 (code), CC BY 4.0 (art) and CC0/USGS (data in data/).
+
+Do not copy rows out of this directory into data/*.csv. The ShareAlike term would
+then attach to those files too, and the NonCommercial term would spread with them.
+Keep the two sets apart and let the game load both.

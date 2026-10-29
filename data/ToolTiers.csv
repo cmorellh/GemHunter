@@ -1,0 +1,6 @@
+RowName,Tier,Name,MaxHardness,MaxDepth
+Hands,Hands,"T0 - Hands & Sieve",7.5,2
+HandTool,HandTool,"T1 - Pick & Shovel",9,30
+PowerTool,PowerTool,"T2 - Power Drill",10,250
+Rig,Rig,"T3 - Drill Rig",10,1200
+Experimental,Experimental,"T4 - Experimental",10,4000

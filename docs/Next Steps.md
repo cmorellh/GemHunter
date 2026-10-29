@@ -2,6 +2,9 @@
 
 Where we left off on 2026-10-21, and what to ask next session. Answers go into [Decisions](Decisions.md).
 
+> **Newer:** the UE5 project skeleton was built on 2026-10-29 — see
+> [Session Notes 2026-10-29](Session%20Notes%202026-10-29.md). The questions below are still open.
+
 ## Setup still pending
 
 - [x] Add the SSH key (`~/.ssh/id_ed25519_github.pub`) to GitHub and confirm `ssh -T git@github.com` greets `cmorellh`

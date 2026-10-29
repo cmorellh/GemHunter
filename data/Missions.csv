@@ -1,0 +1,5 @@
+RowName,Id,LocalityId,Name,DifficultyTier,HintLevel,TargetGems,GemDensity,DepthMin,DepthMax,Reward
+ratnapura_01_first_sieve,ratnapura_01_first_sieve,ratnapura,First Sieve,1,Guided,"((GemId=""sapphire_fancy"",Weight=5.0))",2.0,0.0,1.5,Sieve unlocked; vault opened
+ratnapura_02_wash_the_illam,ratnapura_02_wash_the_illam,ratnapura,Wash the Illam,2,Guided,"((GemId=""sapphire_fancy"",Weight=4.0),(GemId=""sapphire_pink"",Weight=2.0))",1.5,0.5,3.0,Codex: placer deposits
+ratnapura_03_deeper_gravels,ratnapura_03_deeper_gravels,ratnapura,Deeper Gravels,3,Hinted,"((GemId=""sapphire_pink"",Weight=3.0),(GemId=""sapphire_blue"",Weight=1.0))",1.0,2.0,6.0,Pick & shovel (T1)
+ratnapura_04_cornflower,ratnapura_04_cornflower,ratnapura,Chasing Cornflower,4,Unguided,"((GemId=""sapphire_blue"",Weight=2.0))",0.5,4.0,8.0,Overworld map unlocked

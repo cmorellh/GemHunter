@@ -1,0 +1,67 @@
+Gem Hunter
+Copyright 2026 The Gem Hunter contributors
+
+This product includes software developed by the Gem Hunter contributors,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+
+UNREAL ENGINE IS NOT INCLUDED IN THIS REPOSITORY
+================================================
+
+Gem Hunter is built with Unreal Engine, but Unreal Engine is NOT part of this
+repository and is NOT covered by any licence in it.
+
+Unreal Engine is licensed by Epic Games, Inc. under the Unreal Engine End User
+Licence Agreement, which is not an open-source licence:
+
+    https://www.unrealengine.com/eula
+
+What this means in practice:
+
+  * No engine source, binaries or engine Content are committed here. The
+    .gitignore enforces the generated-file side of that; the rest is on us.
+  * To build Gem Hunter you need your own Epic Games account and your own
+    installation of Unreal Engine, and you accept Epic's EULA directly with Epic.
+  * Our Apache-2.0 grant covers our code only. It grants you nothing with respect
+    to Unreal Engine.
+  * Anything you redistribute that contains Unreal Engine code or content is
+    governed by Epic's EULA, not by ours.
+
+Project files that reference the engine (GemHunter.uproject, the .Build.cs and
+.Target.cs files) are ours and are Apache-2.0. The engine they point at is Epic's.
+
+
+THIRD-PARTY PLUGINS
+===================
+
+The core game must stay buildable by anyone who clones the repository, so it
+depends only on plugins that ship with Unreal Engine or are redistributable under
+an open-source licence.
+
+  * Enabled, engine-bundled: PCG, ModelingToolsEditorMode. Covered by Epic's EULA.
+  * No paid or Fab-marketplace plugin may become a core dependency. Marketplace
+    content is generally non-redistributable, so a contributor could not build the
+    game. Such plugins stay optional, or stay out.
+  * Diggable terrain is deliberately behind the IDiggableTerrain interface
+    (Source/GemHunterCore/Public/DiggableTerrain.h) so the backend can be swapped
+    without touching gameplay. The candidates have different licence profiles:
+    UE5VoxelTerrainDemo is open source, Voxel Plugin 2 is paid. Nothing is chosen
+    yet, and nothing is vendored here.
+  * Cesium for Unreal (Apache-2.0) is a possible optional dependency for a real
+    globe. Its default terrain stream, Cesium ion, is a separate hosted service,
+    so it must stay optional for an open-source build.
+
+
+DATA SOURCES
+============
+
+  * U.S. Geological Survey, Mineral Resources Data System (MRDS). U.S. Government
+    work, no use restrictions. https://mrdata.usgs.gov/mrds/
+  * Smithsonian Open Access. CC0 for open-access items, but the NMNH Geogallery
+    listing mixes CC0 with "usage conditions apply", so each item is checked
+    individually before use. https://www.si.edu/openaccess
+  * Mindat. CC BY-NC-SA 4.0, quarantined in data/mindat/ with its own LICENSE.
+    https://www.mindat.org/
+  * GIA Gems & Gemology and other gemmological literature are used as design
+    reference only. Codex text is written in our own words; no copyrighted text
+    is reproduced in the game data.
