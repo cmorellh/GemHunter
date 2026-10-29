@@ -119,45 +119,56 @@ approval:
   `RowName` equals its `Id`, every gem and locality reference resolves, and no
   coordinate was filled in.
 - Nothing generated leaks into `git status`.
+- **End to end, in the editor:** the five CSVs imported as DataTables, the settings
+  were wired up, and Play produced exactly the two expected lines with no errors
+  or warnings:
+  ```
+  LogGemHunterCore: Gem database loaded: 9 gems, 17 localities, 11 rock layers, 5 tool tiers, 4 missions.
+  LogGemHunter: Dig site ready: Ratnapura (Sabaragamuwa, Sri Lanka) - Placer, 3 gems in table, vault holds 0 unique.
+  ```
+  That second line is `AGemHunterGameModeBase` resolving `ratnapura` by id out of
+  the database, so the whole chain works: CSV -> DataTable -> `DefaultGame.ini` ->
+  `UGemDatabaseSubsystem` -> game mode.
+- **The nested struct arrays survived CSV import**, which was the main risk.
+  `FoundGems` and `TargetGems` are intact in the assets and read back correctly at
+  runtime, so all five tables stay CSV. No JSON fallback needed.
 
 ---
 
-## Still to do in the editor
+## Editor setup
 
-Not done because binary `.uasset` / `.umap` files must never be hand-authored.
+> Follow [Editor Setup](Editor%20Setup.md) for the click-level walkthrough.
 
-> **Follow [Editor Setup](Editor%20Setup.md)** for the click-level walkthrough of
-> everything in this section.
+### Done
 
-**1. Import the 5 CSVs as DataTables** into `/Game/GemHunter/Data/`:
+- **Registered UE 5.8 in the registry**, so double-clicking `GemHunter.uproject`
+  opens the editor. Was the first blocker of the session.
+- **Imported all five CSVs** as DataTables into `/Game/GemHunter/Data/`:
+  `DT_Gems` (9 rows), `DT_Localities` (17), `DT_RockLayers` (11), `DT_ToolTiers` (5),
+  `DT_Missions` (4). Each bound to the right row struct; verified by reading the
+  `.uasset` name tables as well as by the runtime log.
+- **Wired the tables into** Project Settings > Game > Gem Hunter Data, which wrote
+  the five paths into `Config/DefaultGame.ini` (committed, so it is a one-time job
+  for the project rather than per machine).
+- **Verified end to end** by pressing Play — see Verified above.
 
-| CSV | Asset name | Row struct |
-|---|---|---|
-| `data/Gems.csv` | `DT_Gems` | `GemRow` |
-| `data/Localities.csv` | `DT_Localities` | `LocalityRow` |
-| `data/RockLayers.csv` | `DT_RockLayers` | `RockLayerRow` |
-| `data/ToolTiers.csv` | `DT_ToolTiers` | `ToolTierRow` |
-| `data/Missions.csv` | `DT_Missions` | `MissionRow` |
+### Remaining
 
-Watch the import log on `FoundGems` / `TargetGems`. Struct-array columns are the
-fragile part of CSV DataTable import; if one fails, convert that single table to
-JSON — the row struct does not change.
+**1. Create the two maps.** Nothing else is blocked on them, but `L_Ratnapura` is
+where Phase 0 gameplay has to live.
 
-**2. Point the settings at them:** Project Settings → Game → **Gem Hunter Data**.
-These are deliberately blank in `Config/DefaultGame.ini` (expected paths are in
-comments there) so the editor does not log a load failure on every start.
+- `/Game/GemHunter/Maps/DigSites/L_Ratnapura` — Open World template
+- `/Game/GemHunter/Maps/Overworld/L_Overworld` — Basic or Empty
 
-**3. Create the maps:**
+Then set **Editor Startup Map** and **Game Default Map** in Project Settings >
+Project > Maps & Modes. They currently point at an engine template map, purely so
+the project would open before any maps existed.
 
-- `/Game/GemHunter/Maps/Overworld/L_Overworld` — stylized world map
-- `/Game/GemHunter/Maps/DigSites/L_Ratnapura` — Phase 0 site
-
-Then repoint `GameDefaultMap` / `EditorStartupMap` in `Config/DefaultEngine.ini`,
-which currently use the engine template map.
-
-**4. Optional:** `BP_GemHunterGameMode_Ratnapura` in `/Game/GemHunter/Blueprints/`,
-subclassing `GemHunterGameModeBase`, to set `ActiveLocalityId` / `ActiveMissionId`
-per level instead of in C++.
+**2. Optional, and better deferred until there is a second site:**
+`BP_GemHunterGameMode_Ratnapura` in `/Game/GemHunter/Blueprints/`, subclassing
+`GemHunterGameModeBase`, to set `ActiveLocalityId` / `ActiveMissionId` per level
+instead of in C++. Hardcoding the site in C++ is fine for exactly one site and
+wrong for two.
 
 ---
 
@@ -184,35 +195,34 @@ names (`Game Design Plan.md` etc.). Worth remembering when writing future prompt
 
 ---
 
-## Not yet committed
+## Committed and pushed
 
-Everything above is in the working tree, unstaged. Suggested commit message:
+**`bb1fdc8` — "Add UE5 C++ project skeleton, data-driven from day one"**, pushed to
+`origin/main`. Working tree clean, local and remote in sync.
 
-```
-Add UE5 C++ project skeleton, data-driven from day one
+This was the repo's first binary content, so also the first real exercise of the
+Git LFS config. It held: `git check-attr filter` confirms only `DT_*.uasset` get
+the `lfs` filter, the five staged blobs are well-formed ~130-byte pointers, and all
+five objects uploaded with none left pending. CSVs, source and docs stay in plain
+git and remain diffable.
 
-Scaffold GemHunter.uproject against UE 5.8 from the engine's TP_Blank
-template, split into two runtime modules:
+(One thing that looks alarming and is not: `git lfs status` labels empty files like
+`.gitkeep` and the template's empty `DefaultEditor.ini` as `LFS: e3b0c44`.
+`e3b0c442` is just the SHA-256 of empty content, and `git check-attr` shows those
+files as `unspecified`. It is a display quirk, not LFS routing.)
 
-- GemHunterCore: DataTable row structs (gems, localities, rock layers,
-  tool tiers, missions), the IDiggableTerrain seam, the database and
-  collection subsystems, and the SaveGame.
-- GemHunter: game mode and first-person player controller stubs only.
+---
 
-The dependency runs one way so the data layer stays reusable. Gameplay
-reads rows through UGemDatabaseSubsystem and never holds a UDataTable
-pointer, which is what keeps "new gem = new CSV row + texture" true.
+## Next session
 
-Seed data/ from the launch roster. Coordinates and depths are left blank
-with TODOs rather than guessed; fill from Mindat or USGS. Mindat-derived
-data is quarantined in data/mindat/ under CC BY-NC-SA 4.0 so share-alike
-cannot spread to the rest of the set.
+The data foundation is done. The gameplay is not, and one decision gates most of it:
 
-Add FMissionRow and the Locality Continent/Region and gem Mohs fields
-that Decisions.md D1/D2 require. License code Apache-2.0, art CC BY 4.0;
-NOTICE records that Unreal Engine stays under Epic's EULA and is not
-included here.
-
-The voxel backend is deliberately unchosen: UE5VoxelTerrainDemo was
-tested on 5.3 and Voxel Plugin 2 is paid, so neither is a dependency.
-```
+- **Choose the voxel backend.** This is the real blocker. `IDiggableTerrain` means
+  either choice can be implemented without rewriting gameplay, but it cannot be
+  deferred much further — see Open issues above.
+- **No gems spawn.** The PCG graphs that read the locality row do not exist yet.
+- **No player character**, so `L_Ratnapura` will be an empty world until there is a
+  first-person pawn.
+- **No vault UI.** `UGemCollectionSubsystem` works; nothing draws it.
+- **Fill the coordinates** from Mindat / USGS. The edit loop is: edit the CSV, then
+  right-click `DT_Localities` > Reimport, then save.
