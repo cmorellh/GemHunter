@@ -8,6 +8,40 @@ in that file are still open.
 
 ---
 
+## Start here next time
+
+**State:** everything below is done, committed and pushed (`3cfb958`). The project
+builds, the gem database loads, and the game mode reads Ratnapura back out of it at
+runtime. There is no gameplay — that is the next phase, not a regression.
+
+**Open the editor:** double-click `GemHunter.uproject`. (Or `.\Open-Editor.ps1`.)
+
+**Pick up with, in order:**
+
+1. **Make the two maps** — the last setup step, ~10 minutes.
+   `L_Ratnapura` (Open World) and `L_Overworld` (Basic), then Project Settings >
+   Project > Maps & Modes. Walkthrough: [Editor Setup](Editor%20Setup.md) section 4.
+2. **Decide the voxel backend.** This is the real blocker and nothing else in
+   Phase 0 moves without it — digging is the core verb. `IDiggableTerrain` means
+   either choice drops in without rewriting gameplay, but the choice itself is
+   awkward: the open-source UE5VoxelTerrainDemo was tested on UE 5.3 and we build
+   against 5.8, while Voxel Plugin 2 is paid and so cannot be a core dependency for
+   an open-source repo. **Decide this before writing any gameplay.**
+3. **Then, in whatever order suits:** a first-person pawn for `L_Ratnapura`, PCG
+   graphs that read the locality row to scatter gems, and the vault UI over
+   `UGemCollectionSubsystem`.
+
+**Independent of all the above** (good filler work, needs no decisions): fill the
+blank `Latitude`/`Longitude` in `data/Localities.csv` and the `0` depths in
+`data/Gems.csv` from Mindat / USGS. Loop is: edit the CSV, right-click
+`DT_Localities` > **Reimport**, save.
+
+**Still unanswered from earlier sessions** — see [Next Steps](Next%20Steps.md):
+reference games, art style, how gems are found (visible / scanner / sieved), the
+economy, and whether the gem book changes the roster.
+
+---
+
 ## Environment as found
 
 Worth recording because the machine lies about it:
