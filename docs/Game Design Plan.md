@@ -69,6 +69,8 @@ UE5 in C++ with Blueprints on top, built around one data-driven gem database so 
 
 Start in the Unreal version the voxel plugin you choose supports; the open-source demo was tested on 5.3.
 
+> **Superseded (2026-10-31).** No third-party voxel plugin turned out to be usable: the open-source candidates are GPL-3.0, which Unreal's EULA forbids shipping with the engine, and the rest are paid Fab products that contributors could not redistribute. Voxels will be written in-house on MIT foundations (RealtimeMeshComponent + Transvoxel tables), and Phase 0 uses sieving rather than volumetric digging. The project builds on **UE 5.8**. See [Decisions D3](Decisions.md).
+
 ## Open source strategy
 
 Your code can be fully open, but Unreal itself cannot be: the engine stays under Epic's EULA, so contributors need their own Epic account and the repo must not include engine source.

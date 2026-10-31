@@ -144,9 +144,18 @@ struct GEMHUNTERCORE_API FRockLayerRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rock Layer")
 	float DepthMax = 0.0f;
 
-	/** Mohs hardness of the host rock, not of the gems inside it. */
+	/** Mohs hardness of the host rock, not of the gems inside it. Drives how hard
+	 *  the layer is to dig, and which tool tier can work it at all. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rock Layer")
 	float Hardness = 0.0f;
+
+	/**
+	 * How gem-bearing this layer is, 0..1. Independent of Hardness: barren
+	 * overburden is soft and yields nothing, while a placer gravel is soft and
+	 * yields plenty. 0 means a scoop of it never contains a gem.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rock Layer")
+	float Fertility = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rock Layer")
 	EToolTier RequiredToolTier = EToolTier::Hands;

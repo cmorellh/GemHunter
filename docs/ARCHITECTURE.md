@@ -113,18 +113,33 @@ way gameplay touches terrain:
 | `GetRockLayerAtLocation(Location)` | `FName` | An `FRockLayerRow` id, or `NAME_None` |
 | `IsTerrainReady()` | `bool` | False while chunks stream, so gem spawning can wait |
 
-**The backend is not chosen yet.** The plan says to prototype with the open-source
-[UE5VoxelTerrainDemo](https://github.com/bw2012/UE5VoxelTerrainDemo) and evaluate
-Voxel Plugin 2 later. Two things complicate that:
+**No third-party voxel plugin is usable** — settled in
+[Decisions D3](Decisions.md). The plan recommended prototyping with
+[UE5VoxelTerrainDemo](https://github.com/bw2012/UE5VoxelTerrainDemo); that is out,
+and not for the reason first recorded here:
 
-- The open-source demo was **tested on UE 5.3**, and this project builds against
-  **5.8**. Expect porting work.
-- **Voxel Plugin 2 is paid**, so it cannot be a core dependency — contributors
-  could not build the game. See `NOTICE`.
+- It and the plugin behind it, [UnrealSandboxTerrain](https://github.com/bw2012/UnrealSandboxTerrain),
+  are **GPL-3.0** (the plugin additionally non-commercial). Unreal's EULA
+  **"Non-Compatible Licenses"** clause names GPL and permits BSD/MIT/MS-PL/Apache,
+  so GPL cannot ship with the engine at all. The engine-version gap is therefore
+  irrelevant — and was smaller than it looked, since the plugin is tested to 5.7
+  even though the demo stayed on 5.3.
+- **Voxel Plugin 2** and **Brahoule** are paid Fab products, so not redistributable.
+- **UE 5.8 ships no voxel terrain.** `MeshTerrainMode` is an Editor-only authoring
+  tool for Mesh Partitions, not a runtime backend.
 
-Hence the interface. The implementation will be an actor that implements it, the
-default methods are inert, and no voxel library is vendored. Swapping backends
-must not touch gameplay code.
+When voxels are written, the licence-clean stack is
+[RealtimeMeshComponent](https://github.com/TriAxis-Games/RealtimeMeshComponent)
+Core (MIT, UE 5.5–5.8) for runtime mesh and collision, plus
+[Lengyel's Transvoxel tables](https://github.com/EricLengyel/Transvoxel) (MIT) for
+seamless chunk LOD. Neither is a voxel system, so the marching-cubes layer is ours.
+
+**Phase 0 implements the interface with a sieve, not voxels.** Ratnapura is a
+placer deposit worked with a sieve, which needs no volumetric carving. Volumetric
+digging arrives in Phase 1 with the first tunnel site. The interface is unchanged
+by this: it already exposes hardness, depth and rock layer, which the sieve needs
+to decide what a scoop yields, so the voxel backend can replace the sieve later
+without touching gameplay.
 
 ---
 
@@ -136,8 +151,8 @@ Following the plan's architecture table:
 |---|---|---|
 | Overworld map | Hand-built stylized map level, nodes placed from locality lat/long, grouped continent → country → region ([D1](Decisions.md)) | Data fields exist; coordinates unfilled; level not built |
 | Real globe | Cesium for Unreal (Apache-2.0), **optional** — its Cesium ion terrain stream is a separate hosted service | Not added |
-| Diggable terrain | Voxels behind `IDiggableTerrain` | Interface only |
-| Ore and gem placement | PCG graphs reading the locality row: host rock, depth band, rarity weights. One graph, many sites | PCG plugin enabled; `Content/GemHunter/PCG/` empty |
+| Diggable terrain | Sieve bed behind `IDiggableTerrain` for Phase 0; voxels in Phase 1 ([D3](Decisions.md)) | `AGravelBedTerrain` working and measured |
+| Ore and gem placement | Yields rolled from the locality row by `UGemYieldLibrary`; PCG graphs for visible in-world gems later | Yield rules working and measured; PCG empty |
 | Collection / vault | UMG or CommonUI backed by `UGemHunterSaveGame` | Subsystem and save struct exist; no UI |
 | Overworld vehicle | A spaceship from the start, persistent hub for vault, upgrades and the mission board ([D2](Decisions.md)) | Not built |
 
@@ -178,6 +193,14 @@ Everything else in `Source/` is a stub, deliberately.
 
 Recorded rather than silently papered over, because each needs a design decision:
 
+- **No player input.** The sieve loop works but is driven by console commands
+  (`GHScoop`, `GHScoopMany`, `GHVault`, `GHTool`) rather than by a pawn. Enhanced
+  Input needs `UInputAction` and `UInputMappingContext` assets, which are binary
+  and must be authored in the editor, so the exec functions exist to make the yield
+  chain testable before those do. A first-person pawn is the next build task.
+- **The gravel bed deforms nothing.** `AGravelBedTerrain::DigSphere` counts scoops
+  and reports geology but removes no material, which is honest for a placer deposit
+  worked by sieving. Volumetric removal arrives with the voxel backend in Phase 1.
 - **`FRockLayerRow` has no `LocalityId`.** Rock layers are currently a global
   table, so every site shares one set of bands. Fine for one dig site; it needs a
   per-locality link, or a locality-to-layer join table, before the second site.

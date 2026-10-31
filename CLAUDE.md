@@ -18,11 +18,13 @@ real place on Earth. Open source by design. Working title.
 - `docs/Decisions.md` — the decision log (D1, D2…). Answers the plan's open questions
 - `docs/Gem Roster.md` — the first-20 draft, pending a cross-check against the gem book
 - `docs/ARCHITECTURE.md` — module map and data flow
-- `docs/Next Steps.md` — where the last session left off
+- `docs/Next Steps.md` — questions still open from the planning sessions
+- `docs/Session Notes 2026-10-29.md` — where the last session left off; starts with a recap
+- `docs/Editor Setup.md` — one-time editor setup walkthrough
 
-**Current phase: Phase 0.** One dig site (Ratnapura river gravels), voxel digging,
-5 gems, 1 tool. Everything outside that is a stub on purpose. Do not build
-gameplay beyond stubs.
+**Current phase: Phase 0.** One dig site (Ratnapura river gravels), **sieving**,
+5 gems, 1 tool. Volumetric voxel digging moved to Phase 1 — see
+[Decisions D3](docs/Decisions.md). Everything outside Phase 0 is a stub on purpose.
 
 ---
 
@@ -67,16 +69,29 @@ Key files:
 - `Source/GemHunterCore/Public/GemCollectionSubsystem.h` — the vault
 - `Source/GemHunterCore/Public/GemHunterDataSettings.h` — which DataTables to load
 
-### The voxel backend is not chosen
+### Digging goes through `IDiggableTerrain`
 
-Digging goes through `IDiggableTerrain`. Nothing in `GemHunter` may call a voxel
-library directly. The candidates have different licence profiles —
-UE5VoxelTerrainDemo is open source but was tested on UE 5.3, Voxel Plugin 2 is
-paid and so unredistributable for contributors — and until one is picked, the
-interface returns inert defaults.
+Nothing in `GemHunter` may call a terrain or voxel library directly.
 
-**Never add a paid or Fab-marketplace plugin as a core dependency.** Marketplace
-content cannot be redistributed, so a contributor could not build the game.
+**No third-party voxel plugin is usable here** ([Decisions D3](docs/Decisions.md)).
+Every candidate is ruled out: UE5VoxelTerrainDemo and UnrealSandboxTerrain are
+**GPL-3.0**, and Unreal's EULA "Non-Compatible Licenses" clause forbids GPL
+outright — so their engine-version drift is beside the point. Voxel Plugin 2 and
+Brahoule are paid Fab products and not redistributable. UE 5.8 ships no voxel
+terrain of its own (`MeshTerrainMode` is Editor-only authoring).
+
+When voxels are built, it is on MIT foundations: **RealtimeMeshComponent** Core
+(MIT, UE 5.5–5.8) plus **Lengyel's Transvoxel tables** (MIT). We own the
+marching-cubes implementation.
+
+**Phase 0 does not use voxels.** Ratnapura is river gravels worked with a sieve, so
+the Phase 0 backend is a sieve/heightfield implementation of the same interface.
+Volumetric digging arrives in Phase 1 with the first tunnel site.
+
+**Never add a paid, Fab-marketplace, or GPL/copyleft plugin as a core dependency.**
+Marketplace content cannot be redistributed and GPL cannot ship with the engine —
+either way a contributor could not build the game. Permitted: BSD, MIT, MS-PL,
+Apache.
 
 ---
 

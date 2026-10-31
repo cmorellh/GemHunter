@@ -1,12 +1,12 @@
-RowName,Id,Name,DepthMin,DepthMax,Hardness,RequiredToolTier
-topsoil,topsoil,"Topsoil & Overburden",0,1.5,2,Hands
-river_gravel,river_gravel,"River Gravels (illam)",0.5,8,4,Hands
-alluvial_clay,alluvial_clay,"Alluvial Clay",1,12,2.5,Hands
-weathered_bedrock,weathered_bedrock,"Weathered Bedrock",8,25,5,HandTool
-basalt,basalt,"Basalt Flow",0,60,6,HandTool
-marble,marble,"Metamorphic Marble",10,120,3.5,HandTool
-amphibolite,amphibolite,"Amphibolite",2,80,6,HandTool
-pegmatite,pegmatite,"Pegmatite Vein",5,150,7,HandTool
-black_shale,black_shale,"Black Shale",20,200,3,HandTool
-gneiss,gneiss,"Granulite Gneiss",25,400,7,PowerTool
-kimberlite,kimberlite,"Kimberlite Pipe",0,1000,6,PowerTool
+RowName,Id,Name,DepthMin,DepthMax,Hardness,Fertility,RequiredToolTier
+topsoil,topsoil,Topsoil & Overburden,0,0.5,2,0,Hands
+river_gravel,river_gravel,River Gravels (illam),0.5,8,4,1,Hands
+alluvial_clay,alluvial_clay,Alluvial Clay,1,12,2.5,0.15,Hands
+weathered_bedrock,weathered_bedrock,Weathered Bedrock,8,25,5,0.3,HandTool
+basalt,basalt,Basalt Flow,0,60,6,0.5,HandTool
+marble,marble,Metamorphic Marble,10,120,3.5,0.8,HandTool
+amphibolite,amphibolite,Amphibolite,2,80,6,0.8,HandTool
+pegmatite,pegmatite,Pegmatite Vein,5,150,7,0.9,HandTool
+black_shale,black_shale,Black Shale,20,200,3,0.7,HandTool
+gneiss,gneiss,Granulite Gneiss,25,400,7,0.4,PowerTool
+kimberlite,kimberlite,Kimberlite Pipe,0,1000,6,0.6,PowerTool

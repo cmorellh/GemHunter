@@ -213,19 +213,32 @@ The subsystem runs at Game Instance startup, so after changing settings you need
 Maps are binary `.umap` files, which is why none were committed — they have to be
 made here.
 
+`New Level` only creates the level in memory. Saving it is a separate step —
+**File → Save Current Level As…**, or **Ctrl+S**, which opens the same Save Asset
+dialog for a level that has never been saved.
+
+In that dialog, note that the folder tree is rooted at the Content browser, so
+`Content/GemHunter/Maps/DigSites` appears as **GemHunter → Maps → DigSites**.
+There is no literal `Content` folder shown above it.
+
 ### Ratnapura dig site
 
 1. **File → New Level**.
 2. Pick **Open World** (the site is a realistic open-world area per
    [Decisions D1](Decisions.md)).
 3. **File → Save Current Level As…**
-4. Save into `Content/GemHunter/Maps/DigSites/` as **`L_Ratnapura`**.
+4. Navigate to **GemHunter → Maps → DigSites**, name it **`L_Ratnapura`**, Save.
 
 ### Overworld map
 
 1. **File → New Level**, pick **Basic** or **Empty** — the overworld is a
    hand-built stylized map, not terrain.
-2. Save into `Content/GemHunter/Maps/Overworld/` as **`L_Overworld`**.
+2. **File → Save Current Level As…**
+3. Navigate to **GemHunter → Maps → Overworld**, name it **`L_Overworld`**, Save.
+
+If picking **New Level** pops a "Save selected items?" prompt, that is about the
+level you are leaving, not the one you are making. **Don't Save** is right if it is
+just the engine template map you never edited.
 
 ### Then make them the defaults
 
@@ -262,6 +275,134 @@ second, switch to Blueprints:
 
 Each dig-site level then names its own site, and no C++ changes when sites are
 added.
+
+---
+
+## 6. Place the gravel bed and test the sieve
+
+The Phase 0 dig backend (`AGravelBedTerrain`) exists in C++ as of 2026-10-31. It
+implements `IDiggableTerrain` over a river-gravel bed — no voxels, because
+Ratnapura is a placer deposit ([Decisions D3](Decisions.md)).
+
+### First: restart the editor
+
+**If the editor was already open when the C++ was rebuilt, close it and reopen.**
+Live Coding (Ctrl+Alt+F11) can hot-reload changes to existing classes, but it
+cannot reliably register *new* `UCLASS` types. `GravelBedTerrain` is new, so it
+will not appear in the Place Actors panel until the editor restarts.
+
+### Place the bed
+
+1. Open `L_Ratnapura`.
+2. **Window → Place Actors** to open the panel.
+3. Search for **`Gravel Bed Terrain`** and drag it into the level.
+4. Set its **Location** to somewhere you can see, e.g. `0, 0, 0`.
+5. Select it and check the Details panel, **Gem Hunter | Terrain** category:
+
+| Property | Default | Meaning |
+|---|---|---|
+| Locality Id | `ratnapura` | Must match an `Id` in `data/Localities.csv` |
+| Layer Ids | `topsoil`, `river_gravel` | The site's depth bands, shallowest first |
+| Bed Half Extent | `1000, 1000, 200` | Centimetres. So 20 m x 20 m, 4 m deep |
+
+The defaults are already correct for Ratnapura, so you should not need to change
+anything. The bed volume is hidden in game and query-only — it is not something the
+player collides with.
+
+**Units:** the editor works in centimetres, the gem database in metres. `Bed Half
+Extent` is centimetres; `DepthMin`/`DepthMax` in `RockLayers.csv` are metres. The
+actor converts between them in one place (`UnrealUnitsPerMeter`).
+
+### Test it from the console
+
+Press **Play**, then press **`** (backtick) to open the console. There is no player
+input yet — Enhanced Input needs asset authoring — so the sieve loop is exposed as
+console commands:
+
+| Command | What it does |
+|---|---|
+| `GHScoop 1` | Take one scoop at 1 m depth and sieve it |
+| `GHScoop 0.5` | Scoop the overburden instead — should mostly find nothing |
+| `GHScoopMany 200 2` | 200 scoops at 2 m, then print a tally of **that run**. Use this to tune drop rates |
+| `GHVault` | Print the vault: every gem in the database, found or not |
+| `GHTool 0` | Equip T0 Hands/Sieve (the default) |
+| `GHTool 1` | Equip T1 Pick & Shovel, to test that the gates change |
+
+Results print to **Window → Output Log** (filter by `GemHunter`) and as on-screen
+messages. `GHScoopMany` only prints its tally to the log, since 200 lines of
+on-screen text would be useless.
+
+`GHScoopMany` stops early if the dig is blocked (no terrain, unloaded database,
+wrong map) and says how far it got, rather than repeating the same failure 200
+times. An empty scoop is not a failure and does not stop it.
+
+### What to expect
+
+On `BeginPlay` the bed validates itself against the database and logs:
+
+```
+LogGemHunter: GravelBed 'GravelBedTerrain_1' ready: locality 'ratnapura', 2 layers, bed 20 x 20 m, 4.0 m deep.
+```
+
+Measured on 2026-10-31, and worth re-checking after any change to the weights or
+to `GetScoopFindChance`:
+
+| Command | Result | Why |
+|---|---|---|
+| `GHScoopMany 200 2` | **~18-20%** hit rate | `river_gravel`, `Fertility` 1.0 |
+| `GHScoopMany 200 0.3` | **exactly 0%** | `topsoil`, `Fertility` 0.0 — a hard zero |
+
+Over 400 scoops at 2 m the hit rate was 18.5% against 22.2% predicted (within
+noise), and the species split matched the 5 / 4 / 3 weights in `Localities.csv`
+closely: 40 fancy, 25 pink, 9 blue against 36 / 29 / 9 expected.
+
+**Scoop at 2 m, not 1 m.** At 1 m you are in `topsoil`, which is barren by design.
+
+If something is wrong, the actor says so by name rather than failing quietly:
+
+| Message | Cause |
+|---|---|
+| `LocalityId 'x' has no row in the locality table` | Typo in the actor's Locality Id |
+| `LayerId 'x' has no row in the rock layer table` | Typo in Layer Ids |
+| `gem database not loaded` | Section 2 is incomplete |
+| `No diggable terrain in this level` | The bed actor is not placed |
+| `Cannot dig at N m - outside the bed` | Depth exceeds Bed Half Extent Z (4 m by default) |
+| `Your tool cannot work X` | The tool gate working as intended — try `GHTool 1` |
+
+### Tuning drop rates
+
+Almost all of it is data:
+
+- **Which gem, and how often a site gives it** — `data/Localities.csv`,
+  `FoundGems` weights.
+- **Whether a layer holds gems at all** — `data/RockLayers.csv`, `Fertility` (0..1).
+  `topsoil` is `0`, so scooping overburden never yields anything.
+- **Which tool can work a layer** — `Hardness` and `RequiredToolTier` in the same
+  file, against `MaxHardness` / `MaxDepth` in `ToolTiers.csv`.
+
+Only the shape of the curve is code: `UGemYieldLibrary::GetScoopFindChance`
+multiplies fertility by a dig-difficulty term from hardness and by a rarity term.
+That is a rule, not content, so it stays in C++.
+
+**Scoop at 2 m, not 1 m**, to sample `river_gravel`. Depth bands resolve by the
+order the terrain actor lists them, so a probe inside two overlapping bands hits
+the first one — see `data/README.md`.
+
+Use `GHScoopMany 500 2` after a change to see the effect. Note it writes to the
+real vault, so run `GHVault` before and after, or delete the save
+(`Saved/SaveGames/`) to start clean.
+
+### After changing a CSV's columns
+
+Adding or renaming a column is a schema change, so the DataTable must be
+re-imported or the new field stays at its default:
+
+1. **Right-click the `DT_` asset → Reimport.**
+2. **Ctrl+S** to save it.
+3. Restart Play. The subsystem reads tables at Game Instance startup.
+
+`Fertility` was added to `RockLayers.csv` on 2026-10-31, so `DT_RockLayers` needs
+this.
 
 ---
 

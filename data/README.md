@@ -10,7 +10,7 @@ Plain-text, versioned game data. Everything here imports into Unreal as a DataTa
 |---|---|---|
 | `Gems.csv` | `FGemRow` | Gem varieties. Ruby and blue sapphire are both Corundum, hence `MineralSpecies` + `Variety`. |
 | `Localities.csv` | `FLocalityRow` | Real places that become overworld map nodes. |
-| `RockLayers.csv` | `FRockLayerRow` | Depth bands and their Mohs hardness. |
+| `RockLayers.csv` | `FRockLayerRow` | Depth bands, their Mohs hardness, and how gem-bearing they are (`Fertility`). |
 | `ToolTiers.csv` | `FToolTierRow` | Tool progression: `MaxHardness` + `MaxDepth` are the whole gate. |
 | `Missions.csv` | `FMissionRow` | Per-site missions. Phase 0 seeds Ratnapura only. |
 | `mindat/` | — | Mindat-derived data, kept separate for licensing. See `mindat/LICENSE`. |
@@ -35,6 +35,21 @@ Plain-text, versioned game data. Everything here imports into Unreal as a DataTa
 - **Blank numeric cells import as 0.** Latitude and Longitude are deliberately
   blank; `Notes` carries the `TODO` so a 0,0 coordinate is never mistaken for
   a real one off the Gulf of Guinea.
+
+## Two things that are easy to get wrong
+
+**`Hardness` and `Fertility` are independent.** Hardness is how hard the layer is
+to dig and which tool tier can work it. Fertility (0..1) is whether it holds gems
+at all. Barren topsoil is soft; so is the gem-rich illam beneath it. Keying yields
+on hardness alone made overburden out-yield the gravels, which is why `Fertility`
+exists. A layer with `Fertility=0` never produces a gem.
+
+**Overlapping depth bands resolve by order, not by depth.** A site names its own
+layers (on its terrain actor, shallowest first) and the first band whose
+`DepthMin..DepthMax` contains the probe wins. If two bands overlap, the one listed
+first shadows the other. `topsoil` is therefore `0..0.5` and `river_gravel`
+`0.5..8`, so Ratnapura has no ambiguous range. Keep new bands non-overlapping
+unless you intend the shadowing.
 
 ## Unfilled data
 
